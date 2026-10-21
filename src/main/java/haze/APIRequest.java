@@ -39,6 +39,7 @@ public class APIRequest implements RequestHandler<APIGatewayProxyRequestEvent, A
     private static final DynamoDbTable<User> userTable =
             enhancedClient.table(TABLE_NAME, TableSchema.fromBean(User.class));
     private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final OpenMeteoApi openMeteoApi = OpenMeteoApi.create();
 
     private static final Map<String, String> HEADERS = Map.of(
             "Content-Type", "application/json",
@@ -91,6 +92,11 @@ public class APIRequest implements RequestHandler<APIGatewayProxyRequestEvent, A
         }
         if (user.getEmail() == null || !user.getEmail().contains("@")) {
             throw new BadRequestException("A valid email is required");
+        }
+
+        GeocodingResponse geocodingResponse = openMeteoApi.getLocationDetails(user.getOpenMeteoGeolocationId());
+        if (geocodingResponse == null) {
+            throw new BadRequestException("Invalid Open-Meteo geolocation ID: " + user.getOpenMeteoGeolocationId());
         }
 
         try {
