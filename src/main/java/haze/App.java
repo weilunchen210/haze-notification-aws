@@ -35,9 +35,6 @@ public class App implements RequestHandler<Map<String, String>, Void> {
     private static final String TABLE_NAME = System.getenv("TABLE_NAME");
     private static final String QUEUE_URL = System.getenv("QUEUE_URL");
 
-    // Kuala Lumpur
-    private static final double LATITUDE = 3.1412;
-    private static final double LONGITUDE = 101.6865;
     private static final int FORECAST_DAYS = 3;
 
     @Override
