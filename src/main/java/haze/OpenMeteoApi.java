@@ -15,7 +15,8 @@ import java.time.Duration;
  */
 public class OpenMeteoApi {
 
-    private static final String BASE_URL = "https://air-quality-api.open-meteo.com/v1/air-quality";
+    private static final String AIR_QUALITY_URL = "https://air-quality-api.open-meteo.com/v1/air-quality";
+    private static final String GEOLOCATION_URL = "https://geocoding-api.open-meteo.com/v1/get";
 
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
@@ -36,7 +37,7 @@ public class OpenMeteoApi {
      */
     public OpenMeteoResponse getAirQuality(double latitude, double longitude, int forecastDays)
             throws IOException, InterruptedException {
-        URI uri = URI.create(BASE_URL + "?latitude=" + latitude + "&longitude=" + longitude + "&hourly=us_aqi_pm2_5" + "&forecast_days=" + forecastDays);
+        URI uri = URI.create(AIR_QUALITY_URL + "?latitude=" + latitude + "&longitude=" + longitude + "&hourly=us_aqi_pm2_5" + "&forecast_days=" + forecastDays);
 
         HttpRequest request = HttpRequest.newBuilder(uri)
                 .timeout(Duration.ofSeconds(20))
@@ -51,8 +52,11 @@ public class OpenMeteoApi {
         return objectMapper.readValue(response.body(), OpenMeteoResponse.class);
     }
 
-    public OpenMeteoResponse getLocationDetails(long locationId) {
-        URI uri = URI.create(BASE_URL + "?id=" + locationId);
+    /**
+     * Fetches the details of a location.
+     */
+    public GeocodingResponse getLocationDetails(long locationId) {
+        URI uri = URI.create(GEOLOCATION_URL + "?id=" + locationId);
 
         HttpRequest request = HttpRequest.newBuilder(uri).timeout(Duration.ofSeconds(20)).GET().build();
 
@@ -61,7 +65,7 @@ public class OpenMeteoApi {
             if (response.statusCode() != 200) {
                 throw new IOException("Open-Meteo request failed: HTTP " + response.statusCode() + " - " + response.body());
             }
-            return objectMapper.readValue(response.body(), OpenMeteoResponse.class);
+            return objectMapper.readValue(response.body(), GeocodingResponse.class);
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException("Failed to fetch location details", e);
         }

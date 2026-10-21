@@ -50,14 +50,18 @@ public class App implements RequestHandler<Map<String, String>, Void> {
         Map<Long, List<User>> usersByLocation = users.stream()
                 .collect(Collectors.groupingBy(User::getOpenMeteoGeolocationId));
 
-        OpenMeteoResponse response;
-
         for (Map.Entry<Long, List<User>> entry : usersByLocation.entrySet()) {
             long locationId = entry.getKey();
             List<User> usersForLocation = entry.getValue();
 
+            OpenMeteoResponse response;
+
             try {
-                response = openMeteoApi.getLocationDetails(locationId);
+                GeocodingResponse locationResponse = openMeteoApi.getLocationDetails(locationId);
+                 response = openMeteoApi.getAirQuality(
+                        locationResponse.getLatitude(),
+                        locationResponse.getLongitude(),
+                        FORECAST_DAYS);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to fetch air quality forecast for location ID: " + locationId, e);
             }
